@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "644308586622",
+    "firebase_url": "https://apegueseaap.firebaseio.com",
+    "project_id": "apegueseaap",
+    "storage_bucket": "apegueseaap.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:644308586622:android:aec12d512eeb0567",
+        "android_client_info": {
+          "package_name": "com.univas.apegueseapp.apegueseapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7hV6pLdQQKBSDC-TbQNhhIk5icNJ7v_s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "644308586622-8mdb5jdet79m4tmspgi75g2dqhl60o46.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

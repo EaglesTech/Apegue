@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/register"
+    tools:context="com.univas.apegueseapp.apegueseapp.SetupActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.8">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/setup_profile_image"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="0dp"
+            android:src="@drawable/profile" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_margin="10dp"
+        android:padding="5dp"
+        >
+        <EditText
+            android:id="@+id/setup_username"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="5dp"
+            android:padding="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/inputs"
+            android:drawableLeft="@drawable/username"
+            android:hint="   Username"
+            />
+        <EditText
+            android:id="@+id/setup_full_name"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="5dp"
+            android:padding="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/inputs"
+            android:drawableLeft="@drawable/name"
+            android:hint="   Nome Completo"
+            android:inputType="textMultiLine"
+            />
+
+        <EditText
+            android:id="@+id/setup_country_name"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="5dp"
+            android:padding="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/inputs"
+            android:drawableLeft="@drawable/country"
+            android:hint="   País"
+            android:inputType="textMultiLine"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/setup_information_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/button"
+            android:padding="15dp"
+            android:text="Salvar"
+            android:textColor="@android:color/background_light"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+</LinearLayout>
