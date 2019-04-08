@@ -85,260 +85,364 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-            //Firebase
-            mAuth = FirebaseAuth.getInstance();
-            currentUserID = mAuth.getCurrentUser().getUid();
-            UsersRef = FirebaseDatabase.getInstance().getReference().child("Users");
-            PostsRef = FirebaseDatabase.getInstance().getReference().child("Posts");
-            LikesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
-            requestFriendsRef = FirebaseDatabase.getInstance().getReference().child("FriendRequests");
-
-
-
-            //inicializar layouts: nav, drawer, toolbar, etc ...
-            mTollbar = (Toolbar) findViewById(R.id.main_page_toolbar);
-            setSupportActionBar(mTollbar ); //add tollbar na mainActivity
-            getSupportActionBar().setTitle(" "); //título da tollbar
-
-            AddNewPostButton = (ImageButton) findViewById(R.id.add_new_post_button);
-            aceptNewFriends = (ImageButton) findViewById(R.id.aceptReqFriends);
-            txtNReqFriends = (TextView) findViewById(R.id.txtNumberReqF);
-            searchPost = (ImageButton) findViewById(R.id.searchPost);
-
-            drawerLayout = (DrawerLayout) findViewById(R.id.drawable_layout);
-            actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.drawer_open,R.string.drawer_close); //cria toggle
-            drawerLayout.addDrawerListener(actionBarDrawerToggle); //add botao(toggle) no toolbar
-            actionBarDrawerToggle.syncState();
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            navigationView = (NavigationView) findViewById(R.id.navigation_view);
-
-            //recyclerview
-            postList = (RecyclerView) findViewById(R.id.all_users_post_list);
-            postList.setHasFixedSize(true);
-            linearLayoutManager = new LinearLayoutManager(this);
-            linearLayoutManager.setReverseLayout(true);
-            linearLayoutManager.setStackFromEnd(true);
-            postList.setLayoutManager(linearLayoutManager);
-
-            View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
-            NavProfileImage = (CircleImageView) navView.findViewById(R.id.nav_profile_image);
-            NavProfileUserName = (TextView) navView.findViewById(R.id.nav_user_full_name);
+        //Firebase
+        mAuth = FirebaseAuth.getInstance();
+        currentUserID = mAuth.getCurrentUser().getUid();
+        UsersRef = FirebaseDatabase.getInstance().getReference().child("Users");
+        PostsRef = FirebaseDatabase.getInstance().getReference().child("Posts");
+        LikesRef = FirebaseDatabase.getInstance().getReference().child("Likes");
+        requestFriendsRef = FirebaseDatabase.getInstance().getReference().child("FriendRequests");
 
 
 
+        //inicializar layouts: nav, drawer, toolbar, etc ...
+        mTollbar = (Toolbar) findViewById(R.id.main_page_toolbar);
+        setSupportActionBar(mTollbar ); //add tollbar na mainActivity
+        getSupportActionBar().setTitle("Home"); //título da tollbar
+
+        AddNewPostButton = (ImageButton) findViewById(R.id.add_new_post_button);
+        aceptNewFriends = (ImageButton) findViewById(R.id.aceptReqFriends);
+        txtNReqFriends = (TextView) findViewById(R.id.txtNumberReqF);
+        searchPost = (ImageButton) findViewById(R.id.searchPost);
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawable_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, R.string.drawer_open,R.string.drawer_close); //cria toggle
+        drawerLayout.addDrawerListener(actionBarDrawerToggle); //add botao(toggle) no toolbar
+        actionBarDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        navigationView = (NavigationView) findViewById(R.id.navigation_view);
+
+        //recyclerview
+        postList = (RecyclerView) findViewById(R.id.all_users_post_list);
+        postList.setHasFixedSize(true);
+        linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        postList.setLayoutManager(linearLayoutManager);
+
+        View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
+        NavProfileImage = (CircleImageView) navView.findViewById(R.id.nav_profile_image);
+        NavProfileUserName = (TextView) navView.findViewById(R.id.nav_user_full_name);
 
 
-            requestFriendsRef.child(currentUserID).addValueEventListener((new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    countReqf = 0;
-                    if(dataSnapshot.exists()){
-                        for (DataSnapshot rfSnapshot: dataSnapshot.getChildren()) {
-                            String user = rfSnapshot.getKey();
 
-                            if(rfSnapshot.child("request_type").getValue().toString().equals("received")){
-                                countReqf++;
+
+
+        requestFriendsRef.child(currentUserID).addValueEventListener((new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                countReqf = 0;
+                if(dataSnapshot.exists()){
+                    for (DataSnapshot rfSnapshot: dataSnapshot.getChildren()) {
+                        String user = rfSnapshot.getKey();
+
+                        if(rfSnapshot.child("request_type").getValue().toString().equals("received")){
+                            countReqf++;
+                        }
+
+
+                    }
+
+                    // int  countReqFriends = (int) dataSnapshot.getChildrenCount();
+
+                    txtNReqFriends.setText(countReqf> 0 ?Integer.toString(countReqf) : "");
+
+                }
+                else {
+                    txtNReqFriends.setText("");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        }));
+
+
+        //atualizar foto de perfil e nome de usuário na navbar(puxa do firebase)
+        UsersRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    if(dataSnapshot.hasChild("fullname")) {
+                        String fullname = dataSnapshot.child("fullname").getValue().toString();
+                        NavProfileUserName.setText(fullname);
+                    }
+                    if(dataSnapshot.hasChild("profileimage")) {
+                        String image = dataSnapshot.child("profileimage").getValue().toString();
+                        Picasso.with(MainActivity.this).load(image).placeholder(R.drawable.profile).into(NavProfileImage);
+                    }
+                }else{
+                    Toast.makeText(MainActivity.this, "Nome do perfil não existe...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item)
+            {
+                UserMenuSelector(item);
+                return false;
+            }
+        });
+
+        AddNewPostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SendUserToPostActivity();
+            }
+        });
+
+        aceptNewFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SendUserToFriendsRequestActtivity();
+            }
+        });
+
+
+        searchPost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+
+                View v = getLayoutInflater().inflate(R.layout.filter_post, null);
+                final Spinner spCidades = (Spinner) v.findViewById(R.id.spinnerCidade);
+                final Spinner spEstados = (Spinner) v.findViewById(R.id.spinnerEstado);
+
+
+
+                String estados = loadJSONFromAsset(v.getContext());
+
+
+
+                try {
+                    obj = new JSONObject(estados);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+
+
+                try {
+                    JSONArray arr =     obj.getJSONArray("estados");
+
+                    List<String> listEstados = new ArrayList<String>();
+                    for (int i = 0; i <= arr.length() -1;i++){
+
+                        listEstados.add(arr.optJSONObject(i).getString("nome").toString());
+
+                    }
+
+                    ArrayAdapter<String> adapterSpinner = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_list_item_1, listEstados);
+
+                    spEstados.setAdapter(adapterSpinner);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
+
+                spEstados.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        indexEstado = i;
+
+                        try {
+                            JSONArray arr = obj.getJSONArray("estados").getJSONObject(i).getJSONArray("cidades");
+
+                            List<String> listCidades = new ArrayList<String>();
+                            for (int j = 0; j < arr.length() -1;j++){
+
+                                listCidades.add(arr.getString(j));
+
                             }
 
+                            ArrayAdapter<String> adapterSpinner = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, listCidades);
 
+                            spCidades.setAdapter(adapterSpinner);
+
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
 
-                      // int  countReqFriends = (int) dataSnapshot.getChildrenCount();
 
-                        txtNReqFriends.setText(countReqf> 0 ?Integer.toString(countReqf) : "");
-
-                    }
-                    else {
-                        txtNReqFriends.setText("");
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            }));
-
-
-            //atualizar foto de perfil e nome de usuário na navbar(puxa do firebase)
-            UsersRef.child(currentUserID).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()) {
-                        if(dataSnapshot.hasChild("fullname")) {
-                            String fullname = dataSnapshot.child("fullname").getValue().toString();
-                            NavProfileUserName.setText(fullname);
-                        }
-                        if(dataSnapshot.hasChild("profileimage")) {
-                            String image = dataSnapshot.child("profileimage").getValue().toString();
-                            Picasso.with(MainActivity.this).load(image).placeholder(R.drawable.profile).into(NavProfileImage);
-                        }
-                    }else{
-                        Toast.makeText(MainActivity.this, "Nome do perfil não existe...", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item)
-                {
-                    UserMenuSelector(item);
-                    return false;
-                }
-            });
-
-            AddNewPostButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    SendUserToPostActivity();
-                }
-            });
-
-            aceptNewFriends.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    SendUserToFriendsRequestActtivity();
-                }
-            });
-
-
-            searchPost.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-
-
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-
-                    View v = getLayoutInflater().inflate(R.layout.filter_post, null);
-                    final Spinner spCidades = (Spinner) v.findViewById(R.id.spinnerCidade);
-                    final Spinner spEstados = (Spinner) v.findViewById(R.id.spinnerEstado);
-
-
-
-                    String estados = loadJSONFromAsset(v.getContext());
-
-
-
-                    try {
-                        obj = new JSONObject(estados);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
 
 
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
 
-
-                    try {
-                        JSONArray arr =     obj.getJSONArray("estados");
-
-                        List<String> listEstados = new ArrayList<String>();
-                        for (int i = 0; i <= arr.length() -1;i++){
-
-                            listEstados.add(arr.optJSONObject(i).getString("nome").toString());
-
-                        }
-
-                        ArrayAdapter<String> adapterSpinner = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_list_item_1, listEstados);
-
-                        spEstados.setAdapter(adapterSpinner);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
+                });
 
 
 
-                    spEstados.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            indexEstado = i;
-
-                            try {
-                                JSONArray arr = obj.getJSONArray("estados").getJSONObject(i).getJSONArray("cidades");
-
-                                List<String> listCidades = new ArrayList<String>();
-                                for (int j = 0; j < arr.length() -1;j++){
-
-                                    listCidades.add(arr.getString(j));
-
-                                }
-
-                                ArrayAdapter<String> adapterSpinner = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, listCidades);
-
-                                spCidades.setAdapter(adapterSpinner);
+                builder.setPositiveButton("Aplicar Filtro", new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        cidade = spCidades.getSelectedItem().toString();
+                        filter = true;
 
 
 
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                        postList = (RecyclerView) findViewById(R.id.all_users_post_list);
+                        postList.setHasFixedSize(true);
+                        linearLayoutManager = new LinearLayoutManager(MainActivity.this);
+                        linearLayoutManager.setReverseLayout(true);
+                        linearLayoutManager.setStackFromEnd(true);
+                        postList.setLayoutManager(linearLayoutManager);
 
 
-                        }
+                        DisplayAllUsersPosts();
 
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-
-                        }
-                    });
-
-                    builder.setPositiveButton("Aplicar Filtro", new DialogInterface.OnClickListener() {
-                        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                           cidade = spCidades.getSelectedItem().toString();
-                           filter = true;
+                        //  PostsRef = PostsRef.orderByChild("city").startAt(spCidades.getSelectedItem().toString()).endAt(spCidades.getSelectedItem().toString()+"\uf8ff").getRef();
 
 
 
-                            postList = (RecyclerView) findViewById(R.id.all_users_post_list);
-                            postList.setHasFixedSize(true);
-                            linearLayoutManager = new LinearLayoutManager(MainActivity.this);
-                            linearLayoutManager.setReverseLayout(true);
-                            linearLayoutManager.setStackFromEnd(true);
-                            postList.setLayoutManager(linearLayoutManager);
+                        //                        deposito =  spFiltro.getSelectedItem().toString().split("-")[0].trim();
+                        //
+                        //                        adapter = new SeparacaoPedidosArrayAdapter(enderecos,deposito,depositos);
+                        //                        recyclerView.setLayoutManager(layoutManager);
+                        //                        adapter.setOnItemClickListener(newListenner);
+                        //
+                        //
+                        //                        recyclerView.setAdapter(adapter);
 
 
-                            DisplayAllUsersPosts();
 
-                        }
-                    });
-
-
-                    builder.setNeutralButton("Voltar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            filter = false;
+                    }
+                });
 
 
-                        }
-                    });
+
+                builder.setNeutralButton("Voltar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        filter = false;
 
 
-                    builder.setView(v);
-                    builder.create();
-                    builder.show();
+                    }
+                });
 
 
-                }
-            });
 
-            DisplayAllUsersPosts();
+                builder.setView(v);
+                builder.create();
+                builder.show();
+
+
+
+
+
+            }
+        });
+
+        DisplayAllUsersPosts();
 
     }
+
+
+
+//    public boolean onOptionsItemSelected(MenuItem item)  {
+//        int id = item.getItemId();
+//
+//        if (id == R.id.action_filtros) {
+//
+//
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//
+//            View view = this.getLayoutInflater().inflate(R.layout.filtro_separacao_pedidos, null);
+//            final Spinner spFiltro = (Spinner) view.findViewById(R.id.spinner2);
+//            sg.clear();
+//
+//            for(int i = 0; i < depositos.length(); i++ ){
+//
+//                try {
+//                    sg.add(depositos.getJSONObject(i).getString("DEPCOD").toString()+" - "+depositos.getJSONObject(i).getString("DEPNOM").toString());
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//
+//            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
+//                    android.R.layout.simple_spinner_item, sg);
+//            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//            spFiltro.setAdapter(arrayAdapter);
+//
+//
+//
+//            builder.setPositiveButton("Aplicar Filtro", new DialogInterface.OnClickListener() {
+//                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//
+//                    Toast.makeText(getApplication(), "Filtro", Toast.LENGTH_SHORT).show();
+//
+//                    deposito =  spFiltro.getSelectedItem().toString().split("-")[0].trim();
+//
+//                    adapter = new SeparacaoPedidosArrayAdapter(enderecos,deposito,depositos);
+//                    recyclerView.setLayoutManager(layoutManager);
+//                    adapter.setOnItemClickListener(newListenner);
+//
+//
+//                    recyclerView.setAdapter(adapter);
+//
+//
+//
+//                }
+//            });
+//
+//
+//
+//            builder.setNeutralButton("Voltar", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//
+//                    Toast.makeText(getApplication(), "Voltar", Toast.LENGTH_SHORT).show();
+//
+//                }
+//            });
+//
+//
+//
+//            builder.setView(view);
+//            builder.create();
+//
+//
+//
+//            builder.show();
+//
+//
+//
+//
+//        }
+//
+//        return true;
+//    }
+//
 
 
     //atualizar o status(online/offline) do user
@@ -355,11 +459,11 @@ public class MainActivity extends AppCompatActivity {
 
         //salvar no database
         Map currentStateMap = new HashMap();
-            currentStateMap.put("time", saveCurrentTime);
-            currentStateMap.put("date", saveCurrentDate);
-            currentStateMap.put("type", state);
+        currentStateMap.put("time", saveCurrentTime);
+        currentStateMap.put("date", saveCurrentDate);
+        currentStateMap.put("type", state);
 
-         //cria um novo campo(userState) na tabela Users do BD
+        //cria um novo campo(userState) na tabela Users do BD
         UsersRef.child(currentUserID).child("userState").updateChildren(currentStateMap);
     }
 
@@ -381,7 +485,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Posts, PostsViewHolder> firebaseRecyclerAdapter =
                 new FirebaseRecyclerAdapter<Posts, PostsViewHolder>
                         (
-                            Posts.class, R.layout.all_posts_layout, PostsViewHolder.class, SortPostsInDecendingOrder
+                                Posts.class, R.layout.all_posts_layout, PostsViewHolder.class, SortPostsInDecendingOrder
                         )
                 {
                     @Override
@@ -417,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
                         try{
                             viewHolder.setState(model.getState(),model.getCity());
 //                            viewHolder.setCity();
-                            viewHolder.setValue("R$"+ model.value.replace(".",","));
+                            //viewHolder.setValue("R$"+ model.value.replace(".",","));
                             viewHolder.setDate(model.getDate());
 
 
@@ -460,16 +564,16 @@ public class MainActivity extends AppCompatActivity {
                                 LikesRef.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                      if(LikeChecker.equals(true)){
-                                          if(dataSnapshot.child(PostKey).hasChild(currentUserID)){
-                                              //se like existe
-                                              LikesRef.child(PostKey).child(currentUserID).removeValue(); //remove like
-                                              LikeChecker = false;
-                                          }else{
-                                              LikesRef.child(PostKey).child(currentUserID).setValue(true);//add like
-                                              LikeChecker = false;
-                                          }
-                                      }
+                                        if(LikeChecker.equals(true)){
+                                            if(dataSnapshot.child(PostKey).hasChild(currentUserID)){
+                                                //se like existe
+                                                LikesRef.child(PostKey).child(currentUserID).removeValue(); //remove like
+                                                LikeChecker = false;
+                                            }else{
+                                                LikesRef.child(PostKey).child(currentUserID).setValue(true);//add like
+                                                LikeChecker = false;
+                                            }
+                                        }
                                     }
 
                                     @Override
@@ -493,7 +597,7 @@ public class MainActivity extends AppCompatActivity {
         ImageButton LikePostButton, CommentPostButton;
         TextView value;
         TextView state;
-      //  TextView city;
+        //  TextView city;
         TextView DisplayNoOfLikes;
         int countLikes;
         String currentUserId;
@@ -514,6 +618,11 @@ public class MainActivity extends AppCompatActivity {
             image = (CircleImageView) mView.findViewById(R.id.post_profile_image);
 
 
+//            public void setProfileimage(Context ctx, String profileimage){
+//                CircleImageView image = (CircleImageView) mView.findViewById(R.id.post_profile_image);
+//                Picasso.with(ctx).load(profileimage).into(image);
+//            }
+
         }
 
         //status do botao/coração like(cor)
@@ -522,15 +631,15 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                   if(dataSnapshot.child(PostKey).hasChild(currentUserId)){
-                       countLikes = (int) dataSnapshot.child(PostKey).getChildrenCount();//quantidade de likes dado na postagem
-                       LikePostButton.setImageResource(R.drawable.like);
-                       DisplayNoOfLikes.setText((Integer.toString(countLikes)+(" Likes")));
-                   }else{
-                       countLikes = (int) dataSnapshot.child(PostKey).getChildrenCount();//quantidade de likes dado na postagem
-                       LikePostButton.setImageResource(R.drawable.dislike);
-                       DisplayNoOfLikes.setText(Integer.toString(countLikes)+(" Likes"));
-                   }
+                    if(dataSnapshot.child(PostKey).hasChild(currentUserId)){
+                        countLikes = (int) dataSnapshot.child(PostKey).getChildrenCount();//quantidade de likes dado na postagem
+                        LikePostButton.setImageResource(R.drawable.like);
+                        DisplayNoOfLikes.setText((Integer.toString(countLikes)+(" Likes")));
+                    }else{
+                        countLikes = (int) dataSnapshot.child(PostKey).getChildrenCount();//quantidade de likes dado na postagem
+                        LikePostButton.setImageResource(R.drawable.dislike);
+                        DisplayNoOfLikes.setText(Integer.toString(countLikes)+(" Likes"));
+                    }
 
                 }
 
@@ -553,6 +662,13 @@ public class MainActivity extends AppCompatActivity {
             TextView txtstate = (TextView) mView.findViewById(R.id.post_state);
             txtstate.setText(state+" - "+cidade);
         }
+
+
+//        public void setCity(String city) {
+//            TextView txtcity = (TextView) mView.findViewById(R.id.post_city);
+//            txtcity.setText(city);
+//
+//        }
 
 
         public CircleImageView getImage() {
@@ -619,7 +735,7 @@ public class MainActivity extends AppCompatActivity {
                     if(!dataSnapshot.hasChild("username")){
                         SendUserToSetupActivity();
                     }
-                     //envia o usuário para setup activity
+                    //envia o usuário para setup activity
                 }
             }
 
@@ -773,8 +889,4 @@ public class MainActivity extends AppCompatActivity {
         return json;
 
     }
-
-
-
-
 }

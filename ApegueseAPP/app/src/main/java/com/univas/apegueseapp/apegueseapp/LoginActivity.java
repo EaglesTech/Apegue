@@ -37,7 +37,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.univas.apegueseapp.apegueseapp.R;
+
 
 import java.util.Arrays;
 
@@ -192,7 +192,6 @@ public class LoginActivity extends AppCompatActivity {
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-                */
 
         //ao clicar no botão google sign
         googleSignInButton.setOnClickListener(new View.OnClickListener() {
@@ -201,6 +200,7 @@ public class LoginActivity extends AppCompatActivity {
                 signIn();
             }
         });
+        */
     }
 
     //======= inicio login com conta do google =======
